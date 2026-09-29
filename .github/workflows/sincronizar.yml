@@ -1,0 +1,34 @@
+name: Sincronizar con WordPress
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sincronizar
+  cancel-in-progress: false
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descargar entradas de WordPress
+        run: python3 sincronizar.py
+      - name: Probar que el sitio se arma sin errores
+        run: python3 build.py
+      - name: Guardar cambios (si hay)
+        run: |
+          if git diff --quiet -- datos/; then
+            echo "Sin novedades en WordPress."
+          else
+            git config user.name "volantin-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add datos/
+            git commit -m "Sincronizar entradas desde WordPress"
+            git push
+          fi
