@@ -23,7 +23,7 @@ jobs:
         run: python3 build.py
       - name: Guardar cambios (si hay)
         run: |
-          if git diff --quiet -- datos/; then
+             if [ -z "$(git status --porcelain -- datos/)" ]; then
             echo "Sin novedades en WordPress."
           else
             git config user.name "volantin-bot"
